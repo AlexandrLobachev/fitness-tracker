@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+from typing import List, Type, Union
 
 
 @dataclass
@@ -19,11 +20,7 @@ class InfoMessage:
 
     def get_message(self) -> str:
         """Получить сообщение с данными о тренировке."""
-        return self.PATTERN_MESSAGE.format(training_type=self.training_type,
-                                           duration=self.duration,
-                                           distance=self.distance,
-                                           speed=self.speed,
-                                           calories=self.calories)
+        return self.PATTERN_MESSAGE.format(**asdict(self))
 
 
 @dataclass
@@ -87,9 +84,6 @@ class SportsWalking(Training):
     KMPH_IN_MPSEC = round(1000 / 3600, 3)
     CM_IN_M = 100
 
-    action: int
-    duration: float
-    weight: float
     height: int
 
     def get_spent_calories(self) -> float:
@@ -112,9 +106,6 @@ class Swimming(Training):
     CALORIES_WEIGHT_MULTIPLIER = 1.1
     CALORIES_DURATION_MULTIPLIER = 2
 
-    action: int
-    duration: float
-    weight: float
     length_pool: int
     count_pool: int
 
@@ -134,11 +125,11 @@ class Swimming(Training):
 
 
 def read_package(workout_type: str,
-                 data: list[int, float, float, int, int]) -> Training:
+                 data: List[Union[int, float]]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    type_traing_dict: dict[str, Training] = {'SWM': Swimming,
-                                             'RUN': Running,
-                                             'WLK': SportsWalking}
+    type_traing_dict: dict[str, Type[Training]] = {'SWM': Swimming,
+                                                   'RUN': Running,
+                                                   'WLK': SportsWalking}
     return type_traing_dict.get(workout_type)(*data)
 
 
